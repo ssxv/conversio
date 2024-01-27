@@ -26,7 +26,7 @@ export default function ChatroomMessages({ messages, loading }) {
             return <div className="chat-message-read">Read</div>;
         } else if (message.error) {
             return <div>Failed</div>;
-        } else if (message.clientId && message.id !== message.clientId) {
+        } else if (message.id !== message.clientId) {
             return <div>Sent</div>;
         }
     }

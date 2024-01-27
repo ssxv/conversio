@@ -12,8 +12,8 @@
   --ac-sec: #52bce9;
   --error: #ff3b30;
 
-  --chat-side-head-height: calc(6.5em);
-  --chat-room-head-height: calc(7.5em);
+  --chat-side-head-height: calc(5.9em);
+  --chat-room-head-height: calc(7.2em);
   --chat-room-foot-height: calc(3.5em);
 }
 
@@ -62,6 +62,7 @@ input:focus {
 .search-bar {
   background-color: var(--bg-pri);
   padding: 0.5em;
+  font-size: smaller;
 }
 
 .search-bar-items-wrapper {
@@ -101,10 +102,6 @@ input:focus {
 .signup-title {
   font-size: x-large;
   padding: 0.5em;
-}
-
-.signup {
-
 }
 
 .chat-body {
@@ -196,7 +193,7 @@ input:focus {
 
 .contact-title {
   color: var(--tc-pri);
-  font-size: larger;
+  font-size: medium;
 }
 
 .contact-subtitle {

@@ -34,7 +34,7 @@ export default function ChatPage() {
             socket.on(SOCKET_SERVER_EVENT.NEW_MESSAGE_FOR_NOTIFICATION, (message => {
                 const updatedRecentUsers = recentUsers.map(user => {
                     if (user.id === message.from && user.id !== activeUser.id) {
-                        user.newMessage = message;
+                        user.lastMessage = message;
                     }
                     return user;
                 });
@@ -67,11 +67,9 @@ export default function ChatPage() {
     }
 
     const updateActiveUser = (user) => {
-        if (user.newMessage && user.newMessage.id) {
-            delete user.newMessage;
+        if (user.lastMessage && user.lastMessage.id && !user.lastMessage.read) {
+            user.lastMessage.read = true;
         }
-        // mark message as read
-        axios.post(`${API_SERVER_URL}/messages/read`, { fromUserId: user.id }, prepareReqConfig(currentUser.token));
         setActiveUser(user);
     }
 

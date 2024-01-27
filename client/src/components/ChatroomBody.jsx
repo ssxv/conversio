@@ -1,7 +1,8 @@
 import { ActiveUserContext } from "@/app/chat/page";
 import { CurrentUserContext, WebsocketContext } from "./App";
 import { useContext, useEffect, useState } from "react";
-import { API_SERVER_URL, SOCKET_SERVER_EVENT, MESSAGE_STORE } from "@/lib/data";
+import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data"
+import { MESSAGE_STORE } from "@/lib/messageStore"
 import axios from "axios";
 import ChatroomMessages from "./ChatroomMessages";
 import ChatroomInput from "./ChatroomInput";
@@ -29,9 +30,8 @@ export default function ChatroomBody() {
                     setLoading(false);
                     const recentMessages = value.data;
                     if (hasRecentMessages(recentMessages)) {
-                        const messages = recentMessages.reverse();
+                        const { messages } = MESSAGE_STORE.addMessages(activeUser.id, recentMessages.reverse());
                         setMessages(messages);
-                        MESSAGE_STORE[activeUser.id] = messages;
                     }
                 }
             } catch (reason) {
@@ -40,7 +40,11 @@ export default function ChatroomBody() {
             }
         }
 
-        fetchMessagesForUser();
+        fetchMessagesForUser().then(() => {
+            // mark message as read
+            axios.post(`${API_SERVER_URL}/messages/read`, { fromUserId: activeUser.id }, prepareReqConfig(currentUser.token));
+        });
+
     }, [activeUser]);  // List of reactive dependencies, changes in which cause the useEffect to run
 
     useEffect(() => {
@@ -64,12 +68,8 @@ export default function ChatroomBody() {
     const newMessageEventHandler = (newMessage) => {
         const { from } = newMessage;
         if (from === activeUser.id) {
-
-            const oldMessages = MESSAGE_STORE[from];
-            const newMessages = (oldMessages && oldMessages.length) ?
-                [...oldMessages, newMessage] : [newMessage];
-            setMessages(newMessages);
-            MESSAGE_STORE[from] = newMessages;
+            const { messages } = MESSAGE_STORE.addMessage(from, newMessage);
+            setMessages(messages);
 
             // mark message as read
             axios.post(`${API_SERVER_URL}/messages/read`, { fromUserId: from }, prepareReqConfig(currentUser.token));
@@ -78,51 +78,27 @@ export default function ChatroomBody() {
 
     // used by the sender of the message to mark message as read
     const messageReadEventHandler = (data) => {
-        const { fromUserId, toUserId } = data;
+        const { toUserId } = data;
         if (toUserId === activeUser.id) {
-            const oldMessages = MESSAGE_STORE[toUserId];
-            const newMessages = oldMessages && oldMessages.length && oldMessages.map((message) => {
-                if (message.from === fromUserId) {
-                    message.read = true;
-                }
-                return message;
-            });
-            setMessages(newMessages);
-            MESSAGE_STORE[toUserId] = newMessages;
+            const { messages } = MESSAGE_STORE.markRead(toUserId);
+            setMessages(messages);
         }
     };
 
+    // used by the sender of the message to add new message to its message list
     const newMessageHandler = (newMessage) => {
-        // used by the sender of the message to add new message to its message list
-        const oldMessages = MESSAGE_STORE[newMessage.to];
-        const newMessages = (oldMessages && oldMessages.length) ?
-            [...oldMessages, newMessage] : [newMessage];
-        setMessages(newMessages);
-        MESSAGE_STORE[newMessage.to] = newMessages;
+        const { messages } = MESSAGE_STORE.addMessage(newMessage.to, newMessage);
+        setMessages(messages);
     }
 
     const newMessageSuccessHandler = (message) => {
-        const oldMessages = MESSAGE_STORE[message.to];
-        const newMessages = oldMessages && oldMessages.length && oldMessages.map((oldMessage) => {
-            if (oldMessage.clientId && oldMessage.clientId === message.clientId) {
-                delete oldMessage.error;
-            }
-            return oldMessage;
-        });
-        setMessages(newMessages);
-        MESSAGE_STORE[message.to] = newMessages;
+        const { messages } = MESSAGE_STORE.markSuccess(message.to, message);
+        setMessages(messages);
     }
 
     const newMessageErrorHandler = (message) => {
-        const oldMessages = MESSAGE_STORE[message.to];
-        const newMessages = oldMessages && oldMessages.length && oldMessages.map((oldMessage) => {
-            if (oldMessage.clientId && oldMessage.clientId === message.clientId) {
-                oldMessage.error = true;
-            }
-            return oldMessage;
-        });
-        setMessages(newMessages);
-        MESSAGE_STORE[message.to] = newMessages;
+        const { messages } = MESSAGE_STORE.markError(message.to, message);
+        setMessages(messages);
     }
 
     return (

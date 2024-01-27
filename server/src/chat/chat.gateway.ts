@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     sendMessageReadEvent(dto: ReadMessageDto) {
-        this.logger.log(JSON.stringify(dto, null, 4));
+        this.logger.log(`emit MESSAGE_READ for ${JSON.stringify(dto, null, 4)}`);
         this.webSocketServer.to(this.chatService.getActiveUser(dto.fromUserId))
             .emit(CHAT_EVENT.MESSAGE_READ, dto);
     }
