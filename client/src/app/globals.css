@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tc-pri: #e9edef;
+  --tc-sec: #a7b4bd;
+  --bg-pri: #111b21;
+  --bg-sec: #202c33;
+  --bg-ter: #2a3942;
+  --ac-pri: #005c4b;
+  --ac-sec: #52bce9;
+  --error: #ff3b30;
+
+  --chat-side-head-height: calc(6.5em);
+  --chat-room-head-height: calc(7.5em);
+  --chat-room-foot-height: calc(3.5em);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--tc-pri);
+  background-color: var(--bg-pri);
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  color: var(--tc-pri);
+  padding: 0.5em;
+}
+
+.button-primary,
+.button-primary:hover {
+  color: var(--tc-pri);
+  background-color: var(--ac-pri);
+  padding: 0.5em;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+input {
+  color: var(--tc-pri);
+  background-color: var(--bg-ter);
+  text-decoration: none;
+  padding: 0.5em;
+}
+
+input:focus {
+  outline: none;
+}
+
+.search-bar {
+  background-color: var(--bg-pri);
+  padding: 0.5em;
+}
+
+.search-bar-items-wrapper {
+  border-radius: 15em;
+  background-color: var(--bg-ter);
+}
+
+.container {
+  min-width: 100%;
+}
+
+.display-vertical-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.display-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-name {
+  font-size: xxx-large;
+  font-weight: bold;
+  padding: 2em;
+}
+
+.signup-form {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.signup-title {
+  font-size: x-large;
+  padding: 0.5em;
+}
+
+.signup {
+
+}
+
+.chat-body {
+  display: grid;
+  grid-template-rows: 0fr 1fr 0fr;
+  grid-template-columns: 35% 1fr;
+  min-height: 100vh;
+  height: 100vh;
+}
+
+.chat-sidebar-header {
+  grid-column: 1;
+  grid-row: 1;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--bg-sec);
+  border-bottom: 2px solid var(--bg-pri);
+  margin-bottom: -2px;
+}
+
+.chat-sidebar-body {
+  grid-column: 1;
+  grid-row: 2 / 4;
+  position: sticky;
+  top: var(--chat-side-head-height);
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--chat-side-head-height));
+  height: calc(100vh - var(--chat-side-head-height) - 2px);
+  overflow-y: scroll;
+}
+
+.chatroom {
+  min-width: 320px;
+  border-left: 2px solid var(--bg-pri);
+}
+
+.chatroom-header {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--bg-sec);
+  padding: 0.5em;
+  border-bottom: 2px solid var(--bg-pri);
+  margin-bottom: -2px;
+}
+
+.chatroom-body {
+  grid-column: 2;
+  grid-row: 2;
+  position: sticky;
+  bottom: var(--chat-room-foot-height);
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--chat-room-head-height));
+  height: calc(100vh - var(--chat-room-head-height));
+  padding-top: 0.5em;
+  padding-bottom: 0;
+  padding-left: 1em;
+  padding-right: 1em;
+  overflow-y: scroll;
+}
+
+.chatroom-footer {
+  grid-column: 2;
+  grid-row: 3;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 0.5rem;
+  background-color: var(--bg-sec);
+  border-top: 2px solid var(--bg-pri);
+  margin-top: -2px;
+}
+
+.recent-users {
+  background-color: var(--bg-sec);
+}
+
+.recent-user-active {
+  background-color: var(--bg-ter);
+}
+
+.contact-card {
+  padding: 0.5em;
+  outline: 1px solid var(--bg-pri);
+}
+
+.contact-title {
+  color: var(--tc-pri);
+  font-size: larger;
+}
+
+.contact-subtitle {
+  color: var(--tc-sec);
+  font-size: small;
+}
+
+.tc-accent-secondary {
+  color: var(--ac-sec);
+}
+
+.chatroom-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.chat-message-wrapper {
+  /* display: flex; */
+}
+
+.chat-message {
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  width: 75%;
+  font-size: smaller;
+}
+
+.chat-message-sent {
+  margin-left: auto;
+  background-color: var(--ac-pri);
+}
+
+.chat-message-received {
+  background-color: var(--bg-sec);
+}
+
+.recent-users-loading-info, .chatroom-body-info {
+  padding: 1em;
+  font-size: smaller;
+  text-align: center;
+  color: var(--tc-sec);
+}
+
+.chat-message-read {
+  color: var(--ac-sec);
+}
+
+.chat-message-error {
+  color: var(--error);
+}
+
+.chat-message-info {
+  color: var(--tc-sec);
+  padding-top: 1em;
+  font-size: x-small;
+  display: flex;
+}
+
+.chat-input-error {
+  padding-bottom: 1em;
+  font-size: smaller;
+  text-align: center;
+}
