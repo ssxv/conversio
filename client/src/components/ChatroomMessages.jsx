@@ -50,35 +50,31 @@ export default function ChatroomMessages({ messages, loading }) {
     return (
         <div className="chatroom-body">
             {
-                messages.map((message, index) => {
+                messages.map((message) => {
                     if (message.from === currentUser.id) {
                         return (
-                            <div key={message.id} >
-                                <div className="chat-message-wrapper">
-                                    <div>
-                                        <div className="chat-message chat-message-sent">
-                                            <div>{message.message}</div>
-                                            <div className="chat-message-info">
-                                                <div className="pr-2">{getMessageTime(message)}</div>
-                                                {getMessageStatus(message)}
-                                            </div>
+                            <div key={message.id} className="chat-message-wrapper">
+                                <div className="display-horizontal-top">
+                                    <div className="chat-message chat-message-sent">
+                                        <div>{message.message}</div>
+                                        <div className="chat-message-info">
+                                            <div className="pr-2">{getMessageTime(message)}</div>
+                                            {getMessageStatus(message)}
                                         </div>
                                     </div>
-                                    {/* <span>-</span> */}
+                                    <div className="triangle-topleft"></div>
                                 </div>
                             </div>
                         );
                     } else {
                         return (
-                            <div key={message.id} >
-                                <div className="chat-message-wrapper">
-                                    {/* <div>-</div> */}
-                                    <div>
-                                        <div className="chat-message chat-message-received">
-                                            <div>{message.message}</div>
-                                            <div className="chat-message-info">
-                                                <div className="chat-message-time">{getMessageTime(message)}</div>
-                                            </div>
+                            <div key={message.id} className="chat-message-wrapper">
+                                <div className="display-horizontal-top">
+                                    <div className="triangle-topright"></div>
+                                    <div className="chat-message chat-message-received">
+                                        <div>{message.message}</div>
+                                        <div className="chat-message-info">
+                                            <div className="chat-message-time">{getMessageTime(message)}</div>
                                         </div>
                                     </div>
                                 </div>

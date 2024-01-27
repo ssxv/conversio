@@ -12,7 +12,7 @@ export default function HomePage() {
         </div>
         <div className="mb-3">Or</div>
         <div className="">
-          <Link href="/signup">Sign up to create a new account</Link> 
+          <Link href="/signup">Sign up to create a new account</Link>
         </div>
       </div>
     </div>
