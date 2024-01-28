@@ -33,7 +33,7 @@ export default function ChatPage() {
             console.log('NEW_MESSAGE_FOR_NOTIFICATION listener ON');
             socket.on(SOCKET_SERVER_EVENT.NEW_MESSAGE_FOR_NOTIFICATION, (message => {
                 const updatedRecentUsers = recentUsers.map(user => {
-                    if (user.id === message.from && user.id !== activeUser.id) {
+                    if (user.id === message.from) {
                         user.lastMessage = message;
                     }
                     return user;
@@ -83,7 +83,7 @@ export default function ChatPage() {
     if (!currentUser) return null;
 
     return (
-        <div className="chat-body">
+        <div className="container chat-body">
             <ActiveUserContext.Provider value={{ activeUser }}>
                 <div className="chat-sidebar">
                     <div className="chat-sidebar-header">

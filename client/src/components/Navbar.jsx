@@ -10,7 +10,7 @@ export default function Navbar() {
         <div className="p-1">
             <div className="display-horizontal">
                 <UserCircle2 className="mx-1" color="var(--tc-pri)" />
-                <div className="contact-name flex-1 mx-1">{currentUser.name}</div>
+                <div className="contact-name trim-text flex-1 mx-1">{currentUser.name}</div>
                 <button onClick={logout}>
                     <LogOut color="var(--tc-pri)" />
                 </button>

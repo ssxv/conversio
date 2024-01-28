@@ -6,13 +6,15 @@ export default function Users({ users, userSelectionHandler }) {
 
     const { activeUser } = useContext(ActiveUserContext);
 
+    const highlight = (user) => activeUser && activeUser.id !== user.id && user.lastMessage && !user.lastMessage.read;
+
     return (
         <div className="recent-users">
             {users && users.length > 0 && users.map(user =>
-                <div key={user.id} className={activeUser && user.id === activeUser.id ? 'contact-card recent-user-active' : 'contact-card'} onClick={() => userSelectionHandler(user)}>
+                <div key={user.id} className={`contact-card ${activeUser && activeUser.id === user.id && 'recent-user-active'}`} onClick={() => userSelectionHandler(user)}>
                     <div className="contact-title">{user.name}</div>
-                    {user.lastMessage && <p className={user.lastMessage.read ? "contact-subtitle" : "contact-subtitle tc-accent-secondary"}>{!user.lastMessage.read && '~ '}{user.lastMessage.message}</p>}
-                    {!user.lastMessage && <div className="contact-subtitle">{user.email}</div>}
+                    {user.lastMessage && <p className={`contact-subtitle trim-text ${highlight(user) && 'tc-accent-secondary'}`}>{highlight(user) && '~ '}{user.lastMessage.message}</p>}
+                    {!user.lastMessage && <div className="contact-subtitle trim-text">{user.email}</div>}
                 </div>
             )}
         </div>
