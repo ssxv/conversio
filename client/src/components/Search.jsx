@@ -1,6 +1,6 @@
 "use client"
 import { API_SERVER_URL } from "@/lib/data";
-import { prepareReqConfig } from "@/lib/util";
+import { getReqConfig } from "@/lib/util";
 import axios from "axios";
 import { SearchIcon, X } from "lucide-react";
 import { useContext, useState } from "react";
@@ -21,7 +21,7 @@ export default function Search({ searchResult }) {
         if (searchTextValue.length < 3) return;
         try {
             setLoading(true);
-            const value = await axios.get(`${API_SERVER_URL}/users?searchText=${searchTextValue}`, prepareReqConfig(currentUser.token));
+            const value = await axios.get(`${API_SERVER_URL}/users?searchText=${searchTextValue}`, getReqConfig(currentUser.token));
             setLoading(false);
             searchResult(value.data);
         } catch (reason) {

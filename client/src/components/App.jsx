@@ -1,6 +1,6 @@
 "use client"
 import { API_SERVER_URL, SOCKET_SERVER_URL } from '@/lib/data';
-import { prepareReqConfig } from '@/lib/util';
+import { getReqConfig } from '@/lib/util';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { createContext, useEffect, useState } from 'react';
@@ -33,7 +33,7 @@ export default function App({ children }) {
 
     const login = async (data) => {
         try {
-            const value = await axios.post(`${API_SERVER_URL}/auth/login`, data, prepareReqConfig());
+            const value = await axios.post(`${API_SERVER_URL}/auth/login`, data, getReqConfig());
             const user = value.data;
             localStorage.setItem('user', JSON.stringify(user));
 

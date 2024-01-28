@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useContext } from "react";
 import { CurrentUserContext } from "./App";
 import axios from "axios";
-import { prepareReqConfig } from "@/lib/util";
+import { getReqConfig } from "@/lib/util";
 
 export default function Signup() {
 
@@ -20,7 +20,7 @@ export default function Signup() {
         try {
             const value = await axios.post(`${API_SERVER_URL}/auth/sign-up`, {
                 name, email, password, passwordConfirmation,
-            }, prepareReqConfig());
+            }, getReqConfig());
             const user = value.data;
             localStorage.setItem('user', JSON.stringify(user));
             setCurrentUser(user);

@@ -10,7 +10,6 @@
   --bg-ter: #2a3942;
   --ac-pri: #005c4b;
   --ac-sec: #52bce9;
-  --error: #ff3b30;
 
   --chat-side-head-height: calc(5.9em);
   --chat-room-head-height: calc(7.2em);
@@ -253,10 +252,6 @@ input:focus {
 
 .chat-message-read {
   color: var(--ac-sec);
-}
-
-.chat-message-error {
-  color: var(--error);
 }
 
 .chat-message-info {

@@ -4,7 +4,7 @@ export class ReadMessageDto {
 
     @IsNotEmpty()
     @IsString()
-    fromUserId?: string;
+    senderUserId: string;
 
-    toUserId?: string;
+    receiverUserId?: string;
 }

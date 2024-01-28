@@ -21,13 +21,13 @@ export class MessagesController {
 
   @Get()
   getMessages(@Query(new ValidationPipe({ transform: true })) dto: GetMessageDto, @CurrentUser() currentUser: User) {
-    dto.forUserId = currentUser.id;
+    dto.currentUserId = currentUser.id;
     return this.messagesService.getMessages(dto);
   }
 
   @Post('/read')
   markMessagesRead(@Body(new ValidationPipe({ transform: true })) dto: ReadMessageDto, @CurrentUser() currentUser: User) {
-    dto.toUserId = currentUser.id;
+    dto.receiverUserId = currentUser.id;
     return this.messagesService.markMessagesRead(dto);
   }
 }

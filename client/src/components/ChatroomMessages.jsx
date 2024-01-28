@@ -9,7 +9,7 @@ export default function ChatroomMessages({ messages, loading }) {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    });
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView();
@@ -31,58 +31,43 @@ export default function ChatroomMessages({ messages, loading }) {
         }
     }
 
-    if (loading) {
-        return (
-            <div className="chatroom-body">
-                <div className="chatroom-body-info">fetching recent messages...</div>
-            </div>
-        );
-    }
-
-    if (!messages || !messages.length) {
-        return (
-            <div className="chatroom-body">
-                <div className="chatroom-body-info">You haven't had a conversation with this user yet. Send a message to start a conversation.</div>
-            </div>
-        );
-    }
-
     return (
         <div className="chatroom-body">
-            {
-                messages.map((message) => {
-                    if (message.from === currentUser.id) {
-                        return (
-                            <div key={message.id} className="chat-message-wrapper">
-                                <div className="display-horizontal-top">
-                                    <div className="chat-message chat-message-sent">
-                                        <div>{message.message}</div>
-                                        <div className="chat-message-info">
-                                            <div className="pr-2">{getMessageTime(message)}</div>
-                                            {getMessageStatus(message)}
-                                        </div>
+            {messages && messages.length > 0 && messages.map((message) => {
+                if (message.from === currentUser.id) {
+                    return (
+                        <div key={message.id} className="chat-message-wrapper">
+                            <div className="display-horizontal-top">
+                                <div className="chat-message chat-message-sent">
+                                    <div>{message.message}</div>
+                                    <div className="chat-message-info">
+                                        <div className="pr-2">{getMessageTime(message)}</div>
+                                        {getMessageStatus(message)}
                                     </div>
-                                    <div className="triangle-topleft"></div>
                                 </div>
+                                <div className="triangle-topleft"></div>
                             </div>
-                        );
-                    } else {
-                        return (
-                            <div key={message.id} className="chat-message-wrapper">
-                                <div className="display-horizontal-top">
-                                    <div className="triangle-topright"></div>
-                                    <div className="chat-message chat-message-received">
-                                        <div>{message.message}</div>
-                                        <div className="chat-message-info">
-                                            <div className="chat-message-time">{getMessageTime(message)}</div>
-                                        </div>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div key={message.id} className="chat-message-wrapper">
+                            <div className="display-horizontal-top">
+                                <div className="triangle-topright"></div>
+                                <div className="chat-message chat-message-received">
+                                    <div>{message.message}</div>
+                                    <div className="chat-message-info">
+                                        <div className="chat-message-time">{getMessageTime(message)}</div>
                                     </div>
                                 </div>
                             </div>
-                        );
-                    }
-                })
+                        </div>
+                    );
+                }
+            })
             }
+            <div className="chatroom-body-info">{loading && 'fetching recent messages...'}</div>
+            {!loading && !(messages && messages.length) && <div className="chatroom-body-info">You haven't had a conversation with this user yet. Send a message to start a conversation.</div>}
             <div id="message-end" ref={messagesEndRef} />
         </div>
     );

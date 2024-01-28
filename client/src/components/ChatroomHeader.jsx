@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { ActiveUserContext } from "@/app/chat/page";
+import { ActiveUserContext } from "@/components/Chat";
 import { CurrentUserContext, WebsocketContext } from "./App";
 import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data";
 import axios from "axios";
-import { prepareReqConfig } from "@/lib/util";
+import { getReqConfig } from "@/lib/util";
 
 export default function ChatroomHeader() {
 
@@ -17,7 +17,7 @@ export default function ChatroomHeader() {
         const getUserStatus = async () => {
             try {
                 if (activeUser && activeUser.id) {
-                    const value = await axios.get(`${API_SERVER_URL}/users/${activeUser.id}/status`, prepareReqConfig(currentUser.token));
+                    const value = await axios.get(`${API_SERVER_URL}/users/${activeUser.id}/status`, getReqConfig(currentUser.token));
                     setStatus(value.data.status);
                 }
             } catch (reason) {

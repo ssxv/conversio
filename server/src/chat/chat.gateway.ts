@@ -45,16 +45,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     sendNewMessageEvent(message: Message) {
-        this.logger.log(`emit NEW_MESSAGE and NEW_MESSAGE_FOR_NOTIFICATION for ${JSON.stringify(message, null, 4)}`);
+        this.logger.log(`emit NEW_MESSAGE for ${JSON.stringify(message, null, 4)}`);
         this.webSocketServer.to(this.chatService.getActiveUser(message.to))
             .emit(CHAT_EVENT.NEW_MESSAGE, message);
-        this.webSocketServer.to(this.chatService.getActiveUser(message.to))
-            .emit(CHAT_EVENT.NEW_MESSAGE_FOR_NOTIFICATION, message);
     }
 
     sendMessageReadEvent(dto: ReadMessageDto) {
         this.logger.log(`emit MESSAGE_READ for ${JSON.stringify(dto, null, 4)}`);
-        this.webSocketServer.to(this.chatService.getActiveUser(dto.fromUserId))
+        this.webSocketServer.to(this.chatService.getActiveUser(dto.senderUserId))
             .emit(CHAT_EVENT.MESSAGE_READ, dto);
     }
 

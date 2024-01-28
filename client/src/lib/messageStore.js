@@ -15,6 +15,20 @@ class MessageStore {
      */
     messageStore = {};
 
+    getMessages = (userId) => this.messageStore[userId];
+
+    setMessages = (userId, messages) => this.messageStore[userId] = messages;
+
+    hasMessages = (userId) => {
+        const oldMessages = this.messageStore[userId];
+        return oldMessages && oldMessages.length;
+    }
+
+    getLastMessage = (userId) => {
+        const oldMessages = this.messageStore[userId];
+        return oldMessages && oldMessages.length && oldMessages[oldMessages.length - 1];
+    }
+
     addMessages = (userId, messages) => {
         const oldMessages = this.messageStore[userId];
         const newMessages = (oldMessages && oldMessages.length) ?

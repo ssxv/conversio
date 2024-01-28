@@ -1,10 +1,10 @@
 import { useContext, useState } from "react";
 import { CurrentUserContext, WebsocketContext } from "./App";
-import { ActiveUserContext } from "@/app/chat/page";
+import { ActiveUserContext } from "@/components/Chat";
 import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data";
 import axios from "axios";
 import { SendHorizonal } from "lucide-react";
-import { prepareReqConfig } from "@/lib/util";
+import { getReqConfig } from "@/lib/util";
 
 export default function ChatroomInput({ onMessage, onSuccess, onError }) {
 
@@ -40,7 +40,7 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
             setError(false);
             const value = await axios.post(`${API_SERVER_URL}/messages`, {
                 fromUserId: currentUser.id, toUserId: activeUser.id, clientId: tempMessage.clientId, message
-            }, prepareReqConfig(currentUser.token));
+            }, getReqConfig(currentUser.token));
             setLoading(false);
             
             onSuccess(value.data);
