@@ -33,7 +33,7 @@ export default function Chat() {
     }, [currentUser]);
 
     useEffect(() => {
-        if (socket && activeUser && users && users.length) {
+        if (socket && users && users.length) {
             socket.on(SOCKET_SERVER_EVENT.NEW_MESSAGE, incomingMessageEventHandler);
             socket.on(SOCKET_SERVER_EVENT.MESSAGE_READ, messageReadEventHandler);
             console.log("NEW_MESSAGE, MESSAGE_READ listener ON");
@@ -45,7 +45,7 @@ export default function Chat() {
                 console.log("NEW_MESSAGE, MESSAGE_READ listener OFF");
             }
         };
-    }, [activeUser]);
+    });
 
     const getUsers = async () => {
         if (!currentUser || !currentUser.token) return;
@@ -53,9 +53,11 @@ export default function Chat() {
             setLoadingUsers(true);
             const value = await axios.get(`${API_SERVER_URL}/users/recent`, getReqConfig(currentUser.token));
             setLoadingUsers(false);
-            const users = value.data;
-            setUsers(users);
-            updateActiveUser(users[0]);
+
+            if (value.data && value.data.length) {
+                setUsers(users);
+                updateActiveUser(users[0]);
+            }
         } catch (reason) {
             setLoadingUsers(false);
             console.log(reason);
@@ -76,6 +78,7 @@ export default function Chat() {
 
             if (value.data && value.data.length) {
                 await markMessagesRead(user.id, value.data.reverse());
+                setUsers([...users]);
                 setMessages(MESSAGE_STORE.getMessages(user.id));
             }
         } catch (reason) {
@@ -89,6 +92,8 @@ export default function Chat() {
         if (lastMessage && lastMessage.from === user.id && !lastMessage.read) {
             await markMessagesRead(user.id, MESSAGE_STORE.getMessages(user.id));
         }
+        const updatedUsers = users.find(u => u.id === user.id) ? [...users] : [user, ...users];
+        setUsers(updatedUsers);
         setSearchResult(null);
         setActiveUser(user);
         setMessages(MESSAGE_STORE.getMessages(user.id));
@@ -111,24 +116,10 @@ export default function Chat() {
         setSearchResult(users);
     }
 
-    // used by the sender of the message to add new message to its message list
-    const sentMessageHandler = (newMessage) => {
-        // setUsers([...users]);
-        setMessages(MESSAGE_STORE.addMessage(newMessage.to, newMessage).messages);
-    }
-
-    const sentMessageSuccessHandler = (message) => {
-        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
-    }
-
-    const sentMessageErrorHandler = (message) => {
-        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
-    }
-
     // used by the reciever of the message to add newMessage to message list
     const incomingMessageEventHandler = async (newMessage) => {
         const { from: userId } = newMessage;
-        if (activeUser.id === userId) {
+        if (activeUser && activeUser.id === userId) {
             await axios.post(`${API_SERVER_URL}/messages/read`, { senderUserId: userId }, getReqConfig(currentUser.token));
             newMessage.read = true;
             setMessages(MESSAGE_STORE.addMessage(userId, newMessage).messages);
@@ -140,8 +131,22 @@ export default function Chat() {
 
     // used by the sender of the message to mark message as read
     const messageReadEventHandler = ({ receiverUserId }) => {
+        setUsers([...users]);
         setMessages(MESSAGE_STORE.markRead(receiverUserId).messages);
     };
+
+    const sentMessageHandler = (newMessage) => {
+        setUsers([...users]);
+        setMessages(MESSAGE_STORE.addMessage(newMessage.to, newMessage).messages);
+    }
+
+    const sentMessageSuccessHandler = (message) => {
+        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
+    }
+
+    const sentMessageErrorHandler = (message) => {
+        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
+    }
 
     if (!currentUser) return null;
 
@@ -160,7 +165,7 @@ export default function Chat() {
                     }
                     {!(searchResult && searchResult.length > 0) && loadingUsers && <div className="recent-users-loading-info">loading conversations...</div>}
                     {!(searchResult && searchResult.length > 0) && users && users.length > 0 && <Users users={users} userSelectionHandler={updateActiveUser} />}
-                    {!(searchResult && searchResult.length > 0) && !(users && users.length > 0) && <div className="recent-users-loading-info">You haven't started a conversation with anyone. Start a conversation by searching for users by their name or email.</div>}
+                    {!(searchResult && searchResult.length > 0) && !loadingUsers && !(users && users.length > 0) && <div className="recent-users-loading-info">You haven't started a conversation with anyone. Start a conversation by searching for users by their name or email.</div>}
                 </div>
             </div>
 
