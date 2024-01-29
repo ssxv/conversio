@@ -30,12 +30,13 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [searchResult, setSearchResult] = useState(null);
 
-    useEffect(() => {
-        !(currentUser && currentUser.id) && router.push('/');
-    }, []);
-
     // get recent users
     useEffect(() => {
+        const currentUserFromLocal = currentUser || JSON.parse(localStorage.getItem('user'));
+        if (!currentUserFromLocal) {
+            router.push('/');
+            return;
+        }
         getUsers();
     }, [currentUser]);
 
@@ -101,7 +102,7 @@ export default function Chat() {
         }
         const updatedUsers = users.find(u => u.id === user.id) ? [...users] : [user, ...users];
         setUsers(updatedUsers);
-        setSearchResult(null);
+        setSearchResult(undefined);
         setActiveUser(user);
         setMessages(MESSAGE_STORE.getMessages(user.id));
         fetchRecentConversation(user);
@@ -114,12 +115,6 @@ export default function Chat() {
             return message;
         });
         MESSAGE_STORE.addMessages(senderUserId, newMessages)
-    }
-
-    const searchResultHandler = (seachedUsers) => {
-        if (seachedUsers && seachedUsers.length) {
-            setSearchResult(seachedUsers);
-        }
     }
 
     // used by the reciever of the message to add newMessage to message list
@@ -161,7 +156,11 @@ export default function Chat() {
             <div className="chat-sidebar">
                 <div className="chat-sidebar-header">
                     <Navbar />
-                    <Search searchResult={searchResultHandler} />
+                    <Search
+                        onSearchResult={users => users && users.length && setSearchResult(users)}
+                        onClose={() => setSearchResult(null)}
+                        close={searchResult === undefined}
+                    />
                 </div>
                 <div className="chat-sidebar-body">
                     {searchResult && searchResult.length > 0 && <>
