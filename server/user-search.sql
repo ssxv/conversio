@@ -1,16 +1,43 @@
-CREATE INDEX tsv_index ON public.user USING gin(tsv);
+create index tsv_index on public.user using gin(tsv);
+
+
+create or replace function generate_substrings_text(input_string text, start_length int)
+returns text as $$
+declare
+    input_length int;
+    i int;
+    j int;
+    result_text text := '';
+begin
+    input_length := length(input_string);
+
+    -- Iterate over all possible substring lengths
+    for i in start_length..input_length loop
+        -- Iterate over all possible starting positions
+        for j in 1..(input_length - i + 1) loop
+            -- Concatenate the current substring to the result
+            result_text := result_text || ' ' || substring(input_string from j for i);
+        end loop;
+    end loop;
+
+    -- Remove the leading space
+    result_text := trim(both ' ' from result_text);
+
+    return result_text;
+end;
+$$ language plpgsql;
 
 create or replace function user_search_trigger() returns trigger language 'plpgsql' as $$ 
 begin 
-	new.tsv := setweight(to_tsvector(coalesce(new.email,'')), 'A') || setweight(to_tsvector(coalesce(new.name,'')), 'B');
+	new.tsv := setweight(to_tsvector(generate_substrings_text(new.email, 4)), 'A') || setweight(to_tsvector(generate_substrings_text(new.name, 4)), 'A');
 	return new;
 end 
 $$
 
-CREATE TRIGGER usertsvupdate BEFORE INSERT OR UPDATE
-ON public.user FOR EACH ROW EXECUTE PROCEDURE user_search_trigger();
+create trigger usertsvupdate before insert
+on public.user for each row execute function user_search_trigger();
 
-DROP TRIGGER usertsvupdate ON public.user;
+drop trigger usertsvupdate on public.user;
 
 -- view triggers
 select event_object_schema as table_schema,
