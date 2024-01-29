@@ -7,7 +7,7 @@ import { useContext, useState } from "react";
 import { TailSpin } from "react-loader-spinner";
 import { CurrentUserContext } from "./App";
 
-export default function Search({ searchResult }) {
+export default function Search({ searchResult, onClose }) {
 
     const { currentUser } = useContext(CurrentUserContext);
 
@@ -34,11 +34,11 @@ export default function Search({ searchResult }) {
         setSearchText("");
         setFocused(false);
         setLoading(false);
-        searchResult(null);
+        onClose && onClose();
     }
 
     return (
-        <div className="search-bar">
+        <div className="search-bar" onBlur={closeSearch}>
             <div className="display-horizontal search-bar-items-wrapper">
                 <SearchIcon className="mx-2" color="var(--tc-pri)" />
                 <div className="flex-1">

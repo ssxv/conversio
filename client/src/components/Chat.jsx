@@ -33,6 +33,10 @@ export default function Chat() {
     }, [currentUser]);
 
     useEffect(() => {
+        users && users.length && !(activeUser && activeUser.id) && updateActiveUser(users[0]);
+    }, [users]);
+
+    useEffect(() => {
         if (socket && users && users.length) {
             socket.on(SOCKET_SERVER_EVENT.NEW_MESSAGE, incomingMessageEventHandler);
             socket.on(SOCKET_SERVER_EVENT.MESSAGE_READ, messageReadEventHandler);
@@ -53,11 +57,7 @@ export default function Chat() {
             setLoadingUsers(true);
             const value = await axios.get(`${API_SERVER_URL}/users/recent`, getReqConfig(currentUser.token));
             setLoadingUsers(false);
-
-            if (value.data && value.data.length) {
-                setUsers(users);
-                updateActiveUser(users[0]);
-            }
+            value.data && value.data.length && setUsers(value.data);
         } catch (reason) {
             setLoadingUsers(false);
             console.log(reason);
@@ -109,11 +109,10 @@ export default function Chat() {
         MESSAGE_STORE.addMessages(senderUserId, newMessages)
     }
 
-    const searchResultHandler = (users) => {
-        if (!users) {
-            getUsers();
+    const searchResultHandler = (seachedUsers) => {
+        if (seachedUsers && seachedUsers.length) {
+            setSearchResult(seachedUsers);
         }
-        setSearchResult(users);
     }
 
     // used by the reciever of the message to add newMessage to message list
