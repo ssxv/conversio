@@ -12,10 +12,13 @@ import { MESSAGE_STORE } from "@/lib/messageStore"
 import ChatroomHeader from "./ChatroomHeader"
 import ChatroomMessages from "./ChatroomMessages"
 import ChatroomInput from "./ChatroomInput"
+import { useRouter } from "next/navigation"
 
 export const ActiveUserContext = createContext(null);
 
 export default function Chat() {
+
+    const router = useRouter();
 
     const { currentUser } = useContext(CurrentUserContext);
     const { socket } = useContext(WebsocketContext);
@@ -26,6 +29,10 @@ export default function Chat() {
     const [messagesLoading, setMessagesLoading] = useState(false);
     const [messages, setMessages] = useState([]);
     const [searchResult, setSearchResult] = useState(null);
+
+    useEffect(() => {
+        !(currentUser && currentUser.id) && router.push('/');
+    }, []);
 
     // get recent users
     useEffect(() => {
