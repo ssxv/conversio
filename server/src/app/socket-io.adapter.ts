@@ -15,7 +15,7 @@ export class SocketIOAdapter extends IoAdapter {
             }
         };
         const server: Server = super.createIOServer(port, optionsWithCors);
-        server.of('chat').use(createTokenMiddleware());
+        server.of('socket').use(createTokenMiddleware());
         return server;
     }
 }

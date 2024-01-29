@@ -9,7 +9,7 @@ import { CHAT_EVENT } from "./chat.events";
 import { ReadMessageDto } from "@/messages/dto/read-message.dto";
 
 @UseGuards(SocketAuthGuard)
-@WebSocketGateway({ namespace: 'chat' })
+@WebSocketGateway({ namespace: 'socket' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
     private readonly logger = new Logger(ChatGateway.name);
