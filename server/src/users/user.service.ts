@@ -4,12 +4,13 @@ import { Not, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { ChatService } from '@/chat/chat.service';
 import { Message } from '@/messages/message.entity';
+import { DATASOURCE_NAME } from '@/app/app.constant';
 
 @Injectable()
 export class UsersService {
 
     constructor(
-        @InjectRepository(User)
+        @InjectRepository(User, DATASOURCE_NAME)
         private userRepo: Repository<User>,
 
         @Inject(forwardRef(() => ChatService))

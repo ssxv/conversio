@@ -1,11 +1,9 @@
-import { Controller, Get, Param, Query, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Param, Query, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './user.service';
-import { AuthGuard } from '@/app/guard/auth.guard';
 import { CurrentUser } from '@/app/decorator/current-user.decorator';
 import { User } from './user.entity';
 import { GetUsersDto } from './dto/GetUsersDto';
 
-@UseGuards(AuthGuard)
 @Controller('/users')
 export class UsersController {
 

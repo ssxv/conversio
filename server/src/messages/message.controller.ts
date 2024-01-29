@@ -1,13 +1,11 @@
-import { Body, Controller, Get, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, ValidationPipe } from '@nestjs/common';
 import { MessagesService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { CurrentUser } from '@/app/decorator/current-user.decorator';
 import { User } from '@/users/user.entity';
-import { AuthGuard } from '@/app/guard/auth.guard';
 import { GetMessageDto } from './dto/get-messages.dto';
 import { ReadMessageDto } from './dto/read-message.dto';
 
-@UseGuards(AuthGuard)
 @Controller('/messages')
 export class MessagesController {
 

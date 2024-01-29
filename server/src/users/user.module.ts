@@ -4,10 +4,11 @@ import { User } from './user.entity';
 import { UsersController } from './user.controller';
 import { UsersService } from './user.service';
 import { ChatModule } from '@/chat/chat.module';
+import { DATASOURCE_NAME } from '@/app/app.constant';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User], DATASOURCE_NAME),
         forwardRef(() => ChatModule),
     ],
     controllers: [UsersController],

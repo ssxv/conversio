@@ -6,12 +6,13 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { GetMessageDto } from './dto/get-messages.dto';
 import { ChatGateway } from '@/chat/chat.gateway';
 import { ReadMessageDto } from './dto/read-message.dto';
+import { DATASOURCE_NAME } from '@/app/app.constant';
 
 @Injectable()
 export class MessagesService {
 
     constructor(
-        @InjectRepository(Message)
+        @InjectRepository(Message, DATASOURCE_NAME)
         private messageRepo: Repository<Message>,
 
         @Inject(forwardRef(() => ChatGateway))

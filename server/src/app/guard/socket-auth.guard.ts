@@ -36,5 +36,4 @@ export class SocketAuthGuard implements CanActivate {
         }
         return false;
     }
-
 }

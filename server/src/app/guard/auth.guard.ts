@@ -1,6 +1,8 @@
 import { UsersService } from "@/users/user.service";
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
+import { SKIP_AUTH } from "../decorator/skip-auth.decorator";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -11,14 +13,24 @@ export class AuthGuard implements CanActivate {
         private userService: UsersService,
 
         private jwtService: JwtService,
+
+        private reflector: Reflector,
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        const skipAuth = this.reflector.getAllAndOverride<boolean>(SKIP_AUTH, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (skipAuth) {
+            return true;
+        }
+
         const request = context.switchToHttp().getRequest();
         const bearerToken: string = request?.headers?.authorization;
         const token = bearerToken.substring(7);
         if (!token) {
-            return false;
+            throw new UnauthorizedException();
         }
 
         try {
@@ -29,11 +41,9 @@ export class AuthGuard implements CanActivate {
                 throw new UnauthorizedException();
             }
             request['user'] = existingUser;
-            return true;
         } catch (err) {
-            this.logger.error(`Failed to verify token`);
+            throw new UnauthorizedException('Failed to verify token');
         }
-        return false;
+        return true;
     }
-
 }
