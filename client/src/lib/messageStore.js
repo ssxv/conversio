@@ -1,96 +1,74 @@
 class MessageStore {
 
-
     /**
      * {
-     *   userId1: [
-     *      { from: userId1, to: userId0 },
-     *      { from: userId0, to: userId1 },   
-     *   ],
-     *   userId2: [
-     *      { from: userId2, to: userId0 },
-     *      { from: userId0, to: userId2 },   
-     *   ],
+     *   "userId1": {
+     *      "messageId1": { id: "messageId1", from: "userId1", to: "userId2" },
+     *      "messageId2": { id: "messageId2", from: "userId2", to: "userId1" },
+     *   },
+     *   "userId2": {
+     *      "messageId1": { id: "messageId1", from: "userId1", to: "userId2" },
+     *      "messageId2": { id: "messageId2", from: "userId2", to: "userId1" },
+     *   },
      * }
      */
-    messageStore = {};
+    store = new Map();
 
-    getMessages = (userId) => this.messageStore[userId];
+    getMessagesMap = (userId) => {
+        return this.store.get(userId) ?
+            this.store.get(userId) :
+            new Map();
+    }
 
-    setMessages = (userId, messages) => this.messageStore[userId] = messages;
+    setMessagesMap = (userId, messagesMap) => {
+        this.store.set(userId, messagesMap);
+    }
 
-    hasMessages = (userId) => {
-        const oldMessages = this.messageStore[userId];
-        return oldMessages && oldMessages.length;
+    getMessages = (userId) => {
+        return [...this.getMessagesMap(userId).values()];
     }
 
     getLastMessage = (userId) => {
-        const oldMessages = this.messageStore[userId];
-        return oldMessages && oldMessages.length && oldMessages[oldMessages.length - 1];
+        const messages = this.getMessages(userId);
+        return messages && messages.length && messages[messages.length - 1];
     }
 
     addMessages = (userId, messages) => {
-        const oldMessages = this.messageStore[userId];
-        const newMessages = (oldMessages && oldMessages.length) ?
-            [...oldMessages, ...messages] : [...messages];
-
-        const idSet = new Set();
-        const distinctMessages = [];
-        newMessages.forEach(m => {
-            if (!idSet.has(m.clientId)) {
-                idSet.add(m.clientId);
-                distinctMessages.push(m);
-            }
-        });
-        this.messageStore[userId] = distinctMessages;
-
-        return { messages: distinctMessages };
+        const messagesMap = this.getMessagesMap(userId);
+        messages.forEach(message => messagesMap.set(message.clientId, message));
+        this.setMessagesMap(userId, messagesMap);
+        return { messages: this.getMessages(userId) };
     }
 
     addMessage = (userId, message) => {
-        const { messages } = this.addMessages(userId, [message]);
-        return { messages, message };
+        return { messages: this.addMessages(userId, [message]), message };
     }
 
     markRead = (userId) => {
-        const oldMessages = this.messageStore[userId];
-        const newMessages = oldMessages && oldMessages.length && oldMessages.map((message) => {
+        this.getMessagesMap(userId).forEach((message) => {
             if (message.to === userId) {
                 message.read = true;
             }
-            return message;
         });
-
-        this.messageStore[userId] = newMessages;
-
-        return { messages: newMessages };
+        return { messages: this.getMessages(userId) };
     }
 
     markSuccess = (userId, message) => {
-        const oldMessages = this.messageStore[userId];
-        const newMessages = oldMessages && oldMessages.length && oldMessages.map((oldMessage) => {
-            if (oldMessage.clientId === message.clientId) {
-                oldMessage.id = message.id;
-                delete oldMessage.error;
-            }
-            return oldMessage;
-        });
-        this.messageStore[userId] = newMessages;
-
-        return { messages: newMessages };
+        const existingMessage = this.getMessagesMap(userId).get(message.clientId);
+        if (existingMessage) {
+            existingMessage.id = message.id;
+            delete existingMessage.error;
+        }
+        return { messages: this.getMessages(userId) };
     }
 
     markError = (userId, message) => {
-        const oldMessages = this.messageStore[userId];
-        const newMessages = oldMessages && oldMessages.length && oldMessages.map((oldMessage) => {
-            if (oldMessage.clientId === message.clientId) {
-                oldMessage.error = true;
-            }
-            return oldMessage;
-        });
-        this.messageStore[userId] = newMessages;
-
-        return { messages: newMessages };
+        const existingMessage = this.getMessagesMap(userId).get(message.clientId);
+        if (existingMessage) {
+            existingMessage.id = message.id;
+            delete existingMessage.error;
+        }
+        return { messages: this.getMessages(userId) };
     }
 }
 
