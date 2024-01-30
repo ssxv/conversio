@@ -1,12 +1,8 @@
 "use client"
-import { API_SERVER_URL, SOCKET_SERVER_URL } from '@/lib/data';
-import { getReqConfig } from '@/lib/util';
-import axios from 'axios';
+import { SOCKET_SERVER_URL } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { createContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-
-// const sock = io();
 
 export const CurrentUserContext = createContext(null);
 export const WebsocketContext = createContext(null);
@@ -32,20 +28,7 @@ export default function App({ children }) {
         currentUserFromLocal && router.push('/chat');
     }, []);
 
-    const login = async (data) => {
-        try {
-            const value = await axios.post(`${API_SERVER_URL}/auth/login`, data, getReqConfig());
-            const user = value.data;
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setCurrentUserAndCreateSocket(user);
-
-            router.push('/chat');
-        } catch (err) { }
-    }
-
     const logout = () => {
-
         setCurrentUser(null);
         socket.disconnect();
         localStorage.setItem('user', null);
@@ -53,7 +36,7 @@ export default function App({ children }) {
     }
 
     return (
-        <CurrentUserContext.Provider value={{ currentUser, setCurrentUser, login, logout }} >
+        <CurrentUserContext.Provider value={{ currentUser, setCurrentUserAndCreateSocket, logout }} >
             <WebsocketContext.Provider value={{ socket }}>
                 {children}
             </WebsocketContext.Provider>

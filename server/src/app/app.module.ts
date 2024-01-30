@@ -12,6 +12,7 @@ import { MessagesModule } from '@/messages/message.module';
 import { AuthGuard } from './guard/auth.guard';
 import { DATASOURCE_NAME } from './app.constant';
 import { UsersModule } from '@/users/user.module';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -36,7 +37,6 @@ import { UsersModule } from '@/users/user.module';
       }),
     }),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
@@ -52,11 +52,11 @@ import { UsersModule } from '@/users/user.module';
   ],
   controllers: [AppController],
   providers: [
-    {
-      provide: 'AUTH_GUARD',
-      useClass: AuthGuard,
-    },
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    }
   ],
 })
 export class AppModule { }

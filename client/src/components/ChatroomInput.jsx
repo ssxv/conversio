@@ -12,7 +12,6 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
     const { activeUser } = useContext(ActiveUserContext);
     const { socket } = useContext(WebsocketContext);
 
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
     const prepareTempMessage = (message) => {
@@ -28,32 +27,33 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
             clientId
         };
     };
-    const sendMessageAction = async (formData) => {
-        const { message } = Object.fromEntries(formData);
-        if (!message) return;
 
-        const tempMessage = prepareTempMessage(message);
-        onMessage(tempMessage);
-
+    const sendMessage = async (tempMessage) => {
         try {
-            setLoading(true);
-            setError(false);
+            const { clientId, message } = tempMessage;
             const value = await axios.post(`${API_SERVER_URL}/messages`, {
-                fromUserId: currentUser.id, toUserId: activeUser.id, clientId: tempMessage.clientId, message
+                fromUserId: currentUser.id, toUserId: activeUser.id, clientId, message,
             }, getReqConfig(currentUser.token));
-            setLoading(false);
-            
+
             onSuccess(value.data);
             document.getElementById("new-message-form").reset();
-
         } catch (reason) {
             console.log(reason);
-            setLoading(false);
             setError(true);
             setTimeout(() => setError(false), 5000);
 
             onError(tempMessage);
         }
+    }
+
+    const sendMessageAction = async (formData) => {
+        const { message } = Object.fromEntries(formData);
+        if (!message) return;
+
+        const tempMessage = prepareTempMessage(message);
+        setError(false);
+        onMessage(tempMessage);
+        sendMessage(tempMessage);
     }
 
     const sendClientTyping = () => {
@@ -68,9 +68,11 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
             {error && (<div className="chat-input-error">Couldn't send this message now. Try again in sometime.</div>)}
             <form id="new-message-form" action={sendMessageAction} className="display-horizontal">
                 <div className="flex-1">
-                    <input disabled={loading} className="w-full" onInput={sendClientTyping} type="text" autoComplete="off" autoFocus placeholder="Type a message" name="message" />
+                    <input className="w-full" onInput={sendClientTyping} type="text" autoComplete="off" autoFocus placeholder="Type a message" name="message" />
                 </div>
-                <button disabled={loading} className="ml-3" type="submit"><SendHorizonal color="var(--tc-pri)" /></button>
+                <button className="ml-3" type="submit">
+                    <SendHorizonal color="var(--tc-pri)" />
+                </button>
             </form>
         </div>
     );

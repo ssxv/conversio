@@ -2,52 +2,71 @@
 import { API_SERVER_URL } from "@/lib/data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CurrentUserContext } from "./App";
 import axios from "axios";
 import { getReqConfig } from "@/lib/util";
+import { TailSpin } from "react-loader-spinner";
 
-export default function Signup() {
+export default function SignUp() {
 
-    const { setCurrentUser } = useContext(CurrentUserContext);
+    const { setCurrentUserAndCreateSocket } = useContext(CurrentUserContext);
+    const [signingUp, setSigningUp] = useState(false);
     const router = useRouter();
 
-    const signUpAction = async (formData) => {
-        const { name, email, password, passwordConfirmation } = Object.fromEntries(formData);
-
-        if (password !== passwordConfirmation) return 'Password mismatch';
-
+    const callSignUpApi = async (formData) => {
         try {
-            const value = await axios.post(`${API_SERVER_URL}/auth/sign-up`, {
-                name, email, password, passwordConfirmation,
-            }, getReqConfig());
+            const data = Object.fromEntries(formData);
+            const value = await axios.post(`${API_SERVER_URL}/auth/sign-up`, data, getReqConfig());
             const user = value.data;
             localStorage.setItem('user', JSON.stringify(user));
-            setCurrentUser(user);
+            setCurrentUserAndCreateSocket(user);
             router.push('/chat');
-        } catch (err) { }
+        } catch (reason) {
+            setSigningUp(false);
+            console.log(reason);
+        }
+    }
+
+    const signUpAction = (formData) => {
+        const { password, passwordConfirmation } = Object.fromEntries(formData);
+        if (password !== passwordConfirmation) return 'Password mismatch';
+
+        setSigningUp(true);
+        callSignUpApi(formData);
     }
 
     return (
         <form action={signUpAction}>
             <div>
-                <input type="text" placeholder="Full name" name="name" required />
+                <input disabled={signingUp} type="text" placeholder="Full name" name="name" required />
             </div>
             <br />
             <div>
-                <input type="email" placeholder="Email" name="email" required />
+                <input disabled={signingUp} type="email" placeholder="Email" name="email" required />
             </div>
             <br />
             <div>
-                <input type="password" placeholder="Password" name="password" required />
+                <input disabled={signingUp} type="password" placeholder="Password" name="password" required />
             </div>
             <br />
             <div>
-                <input type="password" placeholder="Confirm Password" name="passwordConfirmation" required />
+                <input disabled={signingUp} type="password" placeholder="Confirm Password" name="passwordConfirmation" required />
             </div>
             <br />
             <div className="display-horizontal">
-                <button className="button-primary" type="submit">Sign-up</button>
+                <button disabled={signingUp} className="button-primary" type="submit">
+                    {signingUp ?
+                        <TailSpin
+                            height="1.5em"
+                            width="1.5em"
+                            color="var(--tc-pri)"
+                            radius="2"
+                            wrapperClass="mx-2"
+                        /> :
+                        'Sign-up'
+                    }
+                </button>
                 <Link className="button-primary ml-3" href="/">Cancel</Link>
             </div>
         </form>

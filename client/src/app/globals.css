@@ -35,6 +35,18 @@ button,
   padding: 0.5em;
 }
 
+::-webkit-scrollbar {
+  width: 0.5em;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-pri)
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-ter)
+}
+
 .button-primary,
 .button-primary:hover {
   color: var(--tc-pri);

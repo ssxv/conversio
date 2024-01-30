@@ -1,4 +1,4 @@
-import Signup from "@/components/Signup";
+import SignUp from "@/components/SignUp";
 
 export default function SignUpPage() {
   return (
@@ -6,7 +6,7 @@ export default function SignUpPage() {
       <div className="display-vertical-center">
         <div className="signup-title mb-2">Sign Up</div>
         <div className="mb-4">Provide the below details to create an account</div>
-        <Signup />
+        <SignUp />
       </div>
     </div>
   )

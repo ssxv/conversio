@@ -28,6 +28,8 @@ export default function ChatroomMessages({ messages, loading }) {
             return <div>Failed</div>;
         } else if (message.id !== message.clientId) {
             return <div>Sent</div>;
+        } else if (message.id === message.clientId) {
+            return <div>Sending...</div>;
         }
     }
 

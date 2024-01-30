@@ -53,14 +53,15 @@ export default function Search({ onSearchResult, onClose, close }) {
                         required
                     />
                 </div>
-                {focused && loading && <TailSpin
-                    visible={loading}
-                    height="1.5em"
-                    width="1.5em"
-                    color="var(--ac-sec)"
-                    radius="2"
-                    wrapperClass="mx-2"
-                />
+                {focused && loading &&
+                    <TailSpin
+                        visible={loading}
+                        height="1.5em"
+                        width="1.5em"
+                        color="var(--ac-sec)"
+                        radius="2"
+                        wrapperClass="mx-2"
+                    />
                 }
                 {focused && !loading && <X onClick={handleClose} className="mx-2" color="var(--tc-pri)" />}
             </div>
