@@ -40,11 +40,12 @@ button,
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-pri)
+  background: var(--bg-sec);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-ter)
+  background: var(--bg-ter);
+  border-left: 1px solid var(--tc-sec);
 }
 
 .button-primary,
@@ -153,7 +154,7 @@ input:focus {
 
 .chatroom {
   min-width: 320px;
-  border-left: 2px solid var(--bg-pri);
+  border-left: 1px solid var(--tc-sec);
 }
 
 .chatroom-header {

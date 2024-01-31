@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+    db:
+        image: conversio-database
+        ports:
+            - 5432:5432
+
+    backend:
+        image: conversio-server
+        ports:
+            - 9000:9000
+        depends_on:
+            - db
+
+    frontend:
+        image: conversio-client
+        depends_on:
+            - backend
+
+    nginx:
+        image: nginx
+        ports:
+            - 80:80
+        restart: always
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - backend
