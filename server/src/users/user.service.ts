@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { ChatService } from '@/chat/chat.service';
-import { Message } from '@/messages/message.entity';
 import { DATASOURCE_NAME } from '@/app/app.constant';
 
 @Injectable()
@@ -30,51 +29,35 @@ export class UsersService {
     }
 
     getUsers(currentUser: User) {
-        return this.userRepo.find({ where: { id: Not(currentUser.id) } });
+        return this.userRepo.find({
+            select: {
+                id: true,
+                email: true,
+                name: true,
+            },
+            where: { id: Not(currentUser.id) }
+        });
     }
 
     getUsersBySearchQuery(searchText: string, currentUser: User) {
-        return this.userRepo.query(`
-        SELECT t1.id as id, t1.name as name, t1.email as email, t1."createdAt" as "createdAt", t1."modifiedAt" as "modifiedAt" FROM (
+        const query = `
+        SELECT t1.id as id, t1.name as name, t1.email as email FROM (
             SELECT * FROM "user" u, plainto_tsquery($1) AS q WHERE (tsv @@ q)
         ) AS t1 WHERE t1.id <> $2 ORDER BY ts_rank_cd(t1.tsv, q) DESC;
-        `, [searchText, currentUser.id.toString()]);
+        `;
+        return this.userRepo.query(query, [searchText, currentUser.id.toString()]);
     }
 
     async getRecentUsers(currentUser: User): Promise<User[]> {
         const query = `
-        select * from ( 
-            select distinct on ("t1"."userId") * from (
-                (select *, u.id as "userId", m.id as "messageId", u."createdAt" as "userCreatedAt", m."createdAt" as "messageCreatedAt", u."modifiedAt" as "userModifiedAt", m."modifiedAt" as "messageModifiedAt" from "user" u left join message m on u.id = m."to" where m."from" = $1) union 
-                (select *, u.id as "userId", m.id as "messageId", u."createdAt" as "userCreatedAt", m."createdAt" as "messageCreatedAt", u."modifiedAt" as "userModifiedAt", m."modifiedAt" as "messageModifiedAt" from "user" u left join message m on u.id = m."from" where m."to" = $1)
-            ) as "t1" order by "t1"."userId", "t1"."messageCreatedAt" desc 
-        ) as "t2" order by "t2"."messageCreatedAt" desc;        
+        select id, email, name from ( 
+            select distinct on ("t1"."id") * from (
+                (select u.id, u.email, u.name, m."createdAt" as "messageCreatedAt" from "user" u left join message m on u.id = m."to" where m."from" = $1) union 
+                (select u.id, u.email, u.name, m."createdAt" as "messageCreatedAt" from "user" u left join message m on u.id = m."from" where m."to" = $1)
+            ) as "t1" order by "t1"."id", "t1"."messageCreatedAt" desc 
+        ) as "t2" order by "t2"."messageCreatedAt" desc;                
         `;
-        const data = await this.userRepo.query(query, [currentUser.id.toString()]);
-        return this.prepareUsers(data);
-    }
-
-    prepareUsers(data: any[]): User[] {
-        return data.map(d => {
-            const message = new Message();
-            message.id = d.messageId;
-            message.from = d.from;
-            message.to = d.to;
-            message.message = d.message;
-            message.read = d.read;
-            message.clientId = d.clientId;
-            message.createdAt = d.messageCreatedAt;
-            message.modifiedAt = d.messageModifiedAt;
-
-            const user = new User();
-            user.id = d.userId;
-            user.name = d.name;
-            user.email = d.email;
-            user.createdAt = d.userCreatedAt;
-            user.modifiedAt = d.userModifiedAt;
-            user['lastMessage'] = message;
-            return user;
-        });
+        return this.userRepo.query(query, [currentUser.id.toString()]);
     }
 
     getUserStatus(userId: string) {

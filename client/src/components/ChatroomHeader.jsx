@@ -4,8 +4,9 @@ import { CurrentUserContext, WebsocketContext } from "./App";
 import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data";
 import axios from "axios";
 import { getReqConfig } from "@/lib/util";
+import { Video } from "lucide-react";
 
-export default function ChatroomHeader() {
+export default function ChatroomHeader({ onInitiateCall }) {
 
     const { currentUser } = useContext(CurrentUserContext);
     const { activeUser } = useContext(ActiveUserContext);
@@ -49,11 +50,30 @@ export default function ChatroomHeader() {
         };
     }, [activeUser]);
 
+    const initiateCall = () => {
+        if (onInitiateCall && currentUser && activeUser) {
+            onInitiateCall({
+                fromUser: {
+                    id: currentUser.id,
+                    email: currentUser.email,
+                    name: currentUser.name,
+                },
+                toUser: { ...activeUser },
+            });
+        }
+    }
+
     return (
         <div className="chatroom-header">
-            <div>
-                <div className="contact-title">{activeUser.name}</div>
-                <div className="contact-subtitle">{status}</div>
+            <div className="display-horizontal">
+                <div className="flex-1">
+                    <div className="contact-title">{activeUser.name}</div>
+                    <div className="contact-subtitle">{status}</div>
+                </div>
+                {onInitiateCall && <button onClick={initiateCall}>
+                    <Video color="var(--tc-pri)" />
+                </button>
+                }
             </div>
         </div>
     );

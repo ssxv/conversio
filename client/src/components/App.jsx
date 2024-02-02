@@ -25,7 +25,6 @@ export default function App({ children }) {
     useEffect(() => {
         const currentUserFromLocal = JSON.parse(localStorage.getItem('user'));
         setCurrentUserAndCreateSocket(currentUserFromLocal);
-        currentUserFromLocal && router.push('/chat');
     }, []);
 
     const logout = () => {

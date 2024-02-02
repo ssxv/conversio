@@ -57,6 +57,8 @@ export class AuthService {
         user.token = token;
         delete user.hash;
         delete user.salt;
+        delete user.createdAt;
+        delete user.modifiedAt;
         return user;
     }
 

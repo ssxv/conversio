@@ -7,6 +7,7 @@ import { ChatService } from "./chat.service";
 import { Message } from "@/messages/message.entity";
 import { CHAT_EVENT } from "./chat.events";
 import { ReadMessageDto } from "@/messages/dto/read-message.dto";
+import { CallRequestDto } from "./dto/call-request.dto";
 
 @UseGuards(SocketAuthGuard)
 @WebSocketGateway({ namespace: 'socket' })
@@ -61,5 +62,33 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log(JSON.stringify(dto, null, 4));
         this.webSocketServer.to(this.chatService.getActiveUser(dto.toUserId))
             .emit(CHAT_EVENT.CLIENT_TYPING, dto);
+    }
+
+    @SubscribeMessage(CHAT_EVENT.CALL_REQUEST)
+    async handleIncomingCallRequest(@MessageBody() dto: CallRequestDto) {
+        this.logger.log(JSON.stringify(dto, null, 4));
+        this.webSocketServer.to(this.chatService.getActiveUser(dto.toUser.id))
+            .emit(CHAT_EVENT.CALL_REQUEST, dto);
+    }
+
+    @SubscribeMessage(CHAT_EVENT.CALL_DECLINED)
+    async handleCallDeclined(@MessageBody() dto: CallRequestDto) {
+        this.logger.log(JSON.stringify(dto, null, 4));
+        this.webSocketServer.to(this.chatService.getActiveUser(dto.toUser.id))
+            .emit(CHAT_EVENT.CALL_DECLINED, dto);
+    }
+
+    @SubscribeMessage(CHAT_EVENT.CALL_ANSWERED)
+    async handleCallAnswered(@MessageBody() dto: CallRequestDto) {
+        this.logger.log(JSON.stringify(dto, null, 4));
+        this.webSocketServer.to(this.chatService.getActiveUser(dto.toUser.id))
+            .emit(CHAT_EVENT.CALL_ANSWERED, dto);
+    }
+
+    @SubscribeMessage(CHAT_EVENT.CALL_ENDED)
+    async handleCallEnded(@MessageBody() dto: CallRequestDto) {
+        this.logger.log(JSON.stringify(dto, null, 4));
+        this.webSocketServer.to(this.chatService.getActiveUser(dto.toUser.id))
+            .emit(CHAT_EVENT.CALL_ENDED, dto);
     }
 }

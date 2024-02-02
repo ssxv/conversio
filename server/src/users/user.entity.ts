@@ -18,7 +18,7 @@ export class User extends BaseEntity {
     @Column({ type: 'text' })
     salt: string;
 
-    @Column({ type: 'tsvector', nullable: true })
+    @Column({ type: 'tsvector', nullable: true, select: false })
     tsv: string;
 
     token?: string;

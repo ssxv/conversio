@@ -13,6 +13,7 @@ import ChatroomHeader from "./ChatroomHeader"
 import ChatroomMessages from "./ChatroomMessages"
 import ChatroomInput from "./ChatroomInput"
 import { useRouter } from "next/navigation"
+import VideoCall from "./VideoCall"
 
 export const ActiveUserContext = createContext(null);
 
@@ -29,6 +30,9 @@ export default function Chat() {
     const [messagesLoading, setMessagesLoading] = useState(false);
     const [messages, setMessages] = useState([]);
     const [searchResult, setSearchResult] = useState(null);
+
+    const [initiateCall, setInitiateCall] = useState(null);
+    const [acceptCall, setAcceptCall] = useState(null);
 
     // get recent users
     useEffect(() => {
@@ -123,7 +127,7 @@ export default function Chat() {
         if (activeUser && activeUser.id === userId) {
             await axios.post(`${API_SERVER_URL}/messages/read`, { senderUserId: userId }, getReqConfig(currentUser.token));
             newMessage.read = true;
-            setMessages(MESSAGE_STORE.addMessage(userId, newMessage).messages);
+            setMessages(MESSAGE_STORE.addMessage(userId, newMessage));
         } else {
             MESSAGE_STORE.addMessage(userId, newMessage);
         }
@@ -133,58 +137,80 @@ export default function Chat() {
     // used by the sender of the message to mark message as read
     const messageReadEventHandler = ({ receiverUserId }) => {
         setUsers([...users]);
-        setMessages(MESSAGE_STORE.markRead(receiverUserId).messages);
+        setMessages(MESSAGE_STORE.markRead(receiverUserId));
     };
 
     const sentMessageHandler = (newMessage) => {
         setUsers([...users]);
-        setMessages(MESSAGE_STORE.addMessage(newMessage.to, newMessage).messages);
+        setMessages(MESSAGE_STORE.addMessage(newMessage.to, newMessage));
     }
 
     const sentMessageSuccessHandler = (message) => {
-        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
+        setMessages(MESSAGE_STORE.markSuccess(message.to, message));
     }
 
     const sentMessageErrorHandler = (message) => {
-        setMessages(MESSAGE_STORE.markSuccess(message.to, message).messages);
+        setMessages(MESSAGE_STORE.markError(message.to, message));
+    }
+
+    const initiateCallHandler = (data) => {
+        setInitiateCall(data);
+    }
+
+    const acceptCallHandler = (data) => {
+        setAcceptCall
     }
 
     if (!currentUser) return null;
 
-    return (
-        <ActiveUserContext.Provider value={{ activeUser }}>
-            <div className="chat-sidebar">
-                <div className="chat-sidebar-header">
-                    <Navbar />
-                    <Search
-                        onSearchResult={users => users && users.length && setSearchResult(users)}
-                        onClose={() => setSearchResult(null)}
-                        close={searchResult === undefined}
-                    />
-                </div>
-                <div className="chat-sidebar-body">
-                    {searchResult && searchResult.length > 0 && <>
-                        <div className="recent-users-loading-info">Search results</div>
-                        <Users users={searchResult} userSelectionHandler={updateActiveUser} />
-                    </>
-                    }
-                    {!(searchResult && searchResult.length > 0) && loadingUsers && <div className="recent-users-loading-info">loading conversations...</div>}
-                    {!(searchResult && searchResult.length > 0) && users && users.length > 0 && <Users users={users} userSelectionHandler={updateActiveUser} />}
-                    {!(searchResult && searchResult.length > 0) && !loadingUsers && !(users && users.length > 0) && <div className="recent-users-loading-info">You haven't started a conversation with anyone. Start a conversation by searching for users by their name or email.</div>}
-                </div>
-            </div>
+    if (initiateCall && initiateCall.fromUser && initiateCall.toUser) {
+        return (
+            <VideoCall fromUser={initiateCall.fromUser} toUser={initiateCall.toUser} callInitiated={true} />
+        );
+    }
 
-            {activeUser && activeUser.id && (
-                <div className="chatroom">
-                    <ChatroomHeader />
-                    <ChatroomMessages messages={messages} loading={messagesLoading} />
-                    <ChatroomInput
-                        onMessage={sentMessageHandler}
-                        onSuccess={sentMessageSuccessHandler}
-                        onError={sentMessageErrorHandler}
-                    />
+    if (acceptCall && acceptCall.fromUser && acceptCall.toUser) {
+        return (
+            <VideoCall fromUser={acceptCall.fromUser} toUser={acceptCall.toUser} acceptCall={true} />
+        );
+    }
+
+    return (
+        <div className=" chat-body">
+            <ActiveUserContext.Provider value={{ activeUser }}>
+                <div className="chat-sidebar">
+                    <div className="chat-sidebar-header">
+                        <Navbar />
+                        <Search
+                            onSearchResult={users => users && users.length && setSearchResult(users)}
+                            onClose={() => setSearchResult(null)}
+                            close={searchResult === undefined}
+                        />
+                    </div>
+                    <div className="chat-sidebar-body">
+                        {searchResult && searchResult.length > 0 && <>
+                            <div className="recent-users-loading-info">Search results</div>
+                            <Users users={searchResult} userSelectionHandler={updateActiveUser} />
+                        </>
+                        }
+                        {!(searchResult && searchResult.length > 0) && loadingUsers && <div className="recent-users-loading-info">loading conversations...</div>}
+                        {!(searchResult && searchResult.length > 0) && users && users.length > 0 && <Users users={users} userSelectionHandler={updateActiveUser} />}
+                        {!(searchResult && searchResult.length > 0) && !loadingUsers && !(users && users.length > 0) && <div className="recent-users-loading-info">You haven't started a conversation with anyone. Start a conversation by searching for users by their name or email.</div>}
+                    </div>
                 </div>
-            )}
-        </ActiveUserContext.Provider>
+
+                {activeUser && activeUser.id && (
+                    <div className="chatroom">
+                        <ChatroomHeader onInitiateCall={initiateCallHandler} onAcceptCall={acceptCallHandler} />
+                        <ChatroomMessages messages={messages} loading={messagesLoading} />
+                        <ChatroomInput
+                            onMessage={sentMessageHandler}
+                            onSuccess={sentMessageSuccessHandler}
+                            onError={sentMessageErrorHandler}
+                        />
+                    </div>
+                )}
+            </ActiveUserContext.Provider>
+        </div>
     );
 }

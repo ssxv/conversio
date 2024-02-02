@@ -16,13 +16,14 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
 
     const prepareTempMessage = (message) => {
         const clientId = crypto.randomUUID();
+        const now = new Date();
         return {
             from: currentUser.id,
             to: activeUser.id,
-            message,
+            message: message.trim(),
             read: false,
-            createdAt: new Date().toJSON(),
-            modifiedAt: new Date().toJSON(),
+            createdAt: now.toJSON(),
+            modifiedAt: now.toJSON(),
             id: clientId,
             clientId
         };
@@ -48,7 +49,7 @@ export default function ChatroomInput({ onMessage, onSuccess, onError }) {
 
     const sendMessageAction = async (formData) => {
         const { message } = Object.fromEntries(formData);
-        if (!message) return;
+        if (!message || !message.trim()) return;
 
         const tempMessage = prepareTempMessage(message);
         setError(false);

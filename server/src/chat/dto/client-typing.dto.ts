@@ -6,5 +6,7 @@ export class ClientTypingDto {
     @IsString()
     toUserId: string;
 
-    fromUserId?: string;
+    @IsNotEmpty()
+    @IsString()
+    fromUserId: string;
 }

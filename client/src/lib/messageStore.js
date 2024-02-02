@@ -37,11 +37,11 @@ class MessageStore {
         const messagesMap = this.getMessagesMap(userId);
         messages.forEach(message => messagesMap.set(message.clientId, message));
         this.setMessagesMap(userId, messagesMap);
-        return { messages: this.getMessages(userId) };
+        return this.getMessages(userId);
     }
 
     addMessage = (userId, message) => {
-        return { messages: this.addMessages(userId, [message]), message };
+        return this.addMessages(userId, [message]);
     }
 
     markRead = (userId) => {
@@ -50,7 +50,7 @@ class MessageStore {
                 message.read = true;
             }
         });
-        return { messages: this.getMessages(userId) };
+        return this.getMessages(userId);
     }
 
     markSuccess = (userId, message) => {
@@ -59,7 +59,7 @@ class MessageStore {
             existingMessage.id = message.id;
             delete existingMessage.error;
         }
-        return { messages: this.getMessages(userId) };
+        return this.getMessages(userId);
     }
 
     markError = (userId, message) => {
@@ -68,7 +68,7 @@ class MessageStore {
             existingMessage.id = message.id;
             delete existingMessage.error;
         }
-        return { messages: this.getMessages(userId) };
+        return this.getMessages(userId);
     }
 }
 
