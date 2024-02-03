@@ -1,18 +1,17 @@
 "use client"
+
 import { useContext, useState } from "react";
 import { CurrentUserContext } from "./App";
 import { LogIn } from "lucide-react";
 import axios from "axios";
 import { API_SERVER_URL } from "@/lib/data";
 import { getReqConfig } from "@/lib/util";
-import { useRouter } from "next/navigation";
 import { TailSpin } from "react-loader-spinner";
 
 export default function SignIn() {
 
     const { setCurrentUserAndCreateSocket } = useContext(CurrentUserContext);
     const [signingIn, setSigningIn] = useState(false);
-    const router = useRouter();
 
     const callLoginApi = async (formData) => {
         try {
@@ -21,7 +20,6 @@ export default function SignIn() {
             const user = value.data;
             localStorage.setItem('user', JSON.stringify(user));
             setCurrentUserAndCreateSocket(user);
-            router.push('/chat');
         } catch (reason) {
             console.log(reason);
             setSigningIn(false);

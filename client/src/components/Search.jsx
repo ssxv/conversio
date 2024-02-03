@@ -1,4 +1,5 @@
 "use client"
+
 import { API_SERVER_URL } from "@/lib/data";
 import { getReqConfig } from "@/lib/util";
 import axios from "axios";

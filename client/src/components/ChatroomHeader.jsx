@@ -6,7 +6,7 @@ import axios from "axios";
 import { getReqConfig } from "@/lib/util";
 import { Video } from "lucide-react";
 
-export default function ChatroomHeader({ onInitiateCall }) {
+export default function ChatroomHeader({ onInitiateVideoCall }) {
 
     const { currentUser } = useContext(CurrentUserContext);
     const { activeUser } = useContext(ActiveUserContext);
@@ -50,16 +50,9 @@ export default function ChatroomHeader({ onInitiateCall }) {
         };
     }, [activeUser]);
 
-    const initiateCall = () => {
-        if (onInitiateCall && currentUser && activeUser) {
-            onInitiateCall({
-                fromUser: {
-                    id: currentUser.id,
-                    email: currentUser.email,
-                    name: currentUser.name,
-                },
-                toUser: { ...activeUser },
-            });
+    const initiateVideoCall = () => {
+        if (onInitiateVideoCall && currentUser && activeUser) {
+            onInitiateVideoCall({ to: { ...activeUser } });
         }
     }
 
@@ -70,7 +63,7 @@ export default function ChatroomHeader({ onInitiateCall }) {
                     <div className="contact-title">{activeUser.name}</div>
                     <div className="contact-subtitle">{status}</div>
                 </div>
-                {onInitiateCall && <button onClick={initiateCall}>
+                {onInitiateVideoCall && <button onClick={initiateVideoCall}>
                     <Video color="var(--tc-pri)" />
                 </button>
                 }

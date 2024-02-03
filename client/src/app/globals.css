@@ -10,6 +10,7 @@
   --bg-ter: #2a3942;
   --ac-pri: #005c4b;
   --ac-sec: #52bce9;
+  --ac-dan: #ff3131;
 
   --chat-side-head-height: calc(5.9em);
   --chat-room-head-height: calc(7.2em);
@@ -53,6 +54,13 @@ button,
 .button-primary:hover {
   color: var(--tc-pri);
   background-color: var(--ac-pri);
+  padding: 0.5em;
+  text-decoration: none;
+}
+
+.button-danger {
+  color: var(--tc-pri);
+  background-color: var(--ac-dan);
   padding: 0.5em;
   text-decoration: none;
 }
@@ -129,6 +137,8 @@ input:focus {
   grid-template-columns: 35% 1fr;
   min-height: 100vh;
   max-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-pri);
 }
 
 .chat-sidebar-header {
@@ -311,13 +321,50 @@ input:focus {
   height: calc(100vh - var(--video-call-foot-height));
 }
 
+.video-call-my-video-wrapper {
+  background-color: black;
+}
+
 .video-call-my-video {
   width: 100%;
-  height: 6em;
+  height: 7em;
+}
+
+.video-call-body {
+  display: grid;
+  grid-template-rows: 2fr;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-pri);
+}
+
+.video-call-front {
+  position: absolute;
+  z-index: 2;
+}
+
+.video-call-back {
+  position: absolute;
+  z-index: -1;
+}
+
+.video-call-their-video-wrapper {
+  background-color: black;
+  width: 100%;
+  height: calc(100vh - var(--video-call-foot-height) - 8.5em);
+  min-height: calc(100vh - var(--video-call-foot-height) - 8.5em);
+}
+
+.video-call-info {
+  text-align: center;
+  vertical-align: middle;
+  line-height: calc(100vh - var(--video-call-foot-height) - 8.5em);
 }
 
 .video-call-their-video {
-  height: calc(100vh - var(--video-call-foot-height) - 7.5em);
+  height: calc(100vh - var(--video-call-foot-height) - 8.5em);
 }
 
 .video-call-footer {
@@ -328,4 +375,12 @@ input:focus {
   background-color: var(--bg-sec);
   border-top: 2px solid var(--bg-pri);
   margin-top: -2px;
+}
+
+.notification {
+  color: var(--tc-pri);
+  font-size: medium;
+  padding: 0.5em;
+  outline: 0.5em solid var(--ac-pri);
+  background-color: var(--bg-sec);
 }

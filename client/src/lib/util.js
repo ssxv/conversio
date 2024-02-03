@@ -16,10 +16,12 @@ export const canGetUserMedia = () => {
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 
-export const getMediaStream = (video, audio, onStream) => {
+export const getMediaStream = async (video, audio) => {
+    const videoDevice = await getVideoDevice();
     const constraints = {};
     if (video) {
         constraints.video = {
+            deviceId: videoDevice.deviceId,
             width: { min: 1024, ideal: 1280, max: 1920 },
             height: { min: 576, ideal: 720, max: 1080 },
         }
@@ -27,5 +29,22 @@ export const getMediaStream = (video, audio, onStream) => {
     if (audio) {
         constraints.audio = true;
     }
-    return navigator.mediaDevices.getUserMedia(constraints).then(onStream).catch((err) => console.log(err));
+    try {
+        return navigator.mediaDevices.getUserMedia(constraints);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const getVideoDevice = async () => {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.find(d => d.kind === 'videoinput');
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const timeout = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

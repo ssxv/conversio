@@ -1,27 +1,28 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
-import Users from "@/components/Users"
 import { CurrentUserContext, WebsocketContext } from "@/components/App"
 import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data"
 import axios from "axios"
-import { getReqConfig, toQueryParams } from "@/lib/util"
+import { getReqConfig, timeout, toQueryParams } from "@/lib/util"
 import Search from "@/components/Search"
 import Navbar from "@/components/Navbar"
 import { MESSAGE_STORE } from "@/lib/messageStore"
 import ChatroomHeader from "./ChatroomHeader"
 import ChatroomMessages from "./ChatroomMessages"
 import ChatroomInput from "./ChatroomInput"
-import { useRouter } from "next/navigation"
+import ChatSidebar from "./ChatSidebar"
+import { Store } from "react-notifications-component"
 import VideoCall from "./VideoCall"
+import VideoCallNotificationIncomingCall from "./VideoCallNotificationIncomingCall"
+import VideoCallNotificationCallDeclined from "./VideoCallNotificationCallDeclined"
+import VideoCallNotificationCallEnded from "./VideoCallNotificationCallEnded"
 
 export const ActiveUserContext = createContext(null);
 
 export default function Chat() {
 
-    const router = useRouter();
-
-    const { currentUser } = useContext(CurrentUserContext);
+    const { currentUser, isLoggedIn } = useContext(CurrentUserContext);
     const { socket } = useContext(WebsocketContext);
 
     const [loadingUsers, setLoadingUsers] = useState(false);
@@ -31,17 +32,13 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [searchResult, setSearchResult] = useState(null);
 
-    const [initiateCall, setInitiateCall] = useState(null);
-    const [acceptCall, setAcceptCall] = useState(null);
+    const [initiateVideoCall, setInitiateVideoCall] = useState(null);
+    const [answerVideoCall, setAnswerVideoCall] = useState(null);
+    const [notificationId, setNotificationId] = useState(null);
 
     // get recent users
     useEffect(() => {
-        const currentUserFromLocal = currentUser || JSON.parse(localStorage.getItem('user'));
-        if (!currentUserFromLocal) {
-            router.push('/');
-            return;
-        }
-        getUsers();
+        isLoggedIn() && getUsers();
     }, [currentUser]);
 
     useEffect(() => {
@@ -52,19 +49,22 @@ export default function Chat() {
         if (socket && users && users.length) {
             socket.on(SOCKET_SERVER_EVENT.NEW_MESSAGE, incomingMessageEventHandler);
             socket.on(SOCKET_SERVER_EVENT.MESSAGE_READ, messageReadEventHandler);
-            console.log("NEW_MESSAGE, MESSAGE_READ listener ON");
+            socket.on(SOCKET_SERVER_EVENT.CALL_REQUEST, incomingCallRequestEventHandler);
+            socket.on(SOCKET_SERVER_EVENT.CALL_DECLINED, callDeclinedEventHandler);
+            socket.on(SOCKET_SERVER_EVENT.CALL_ENDED, callEndedEventHandler);
         }
         return () => {
             if (socket) {
                 socket.off(SOCKET_SERVER_EVENT.NEW_MESSAGE);
                 socket.off(SOCKET_SERVER_EVENT.MESSAGE_READ);
-                console.log("NEW_MESSAGE, MESSAGE_READ listener OFF");
+                socket.off(SOCKET_SERVER_EVENT.CALL_REQUEST);
+                socket.off(SOCKET_SERVER_EVENT.CALL_DECLINED);
+                socket.off(SOCKET_SERVER_EVENT.CALL_ENDED);
             }
         };
     });
 
     const getUsers = async () => {
-        if (!currentUser || !currentUser.token) return;
         try {
             setLoadingUsers(true);
             const value = await axios.get(`${API_SERVER_URL}/users/recent`, getReqConfig(currentUser.token));
@@ -140,6 +140,74 @@ export default function Chat() {
         setMessages(MESSAGE_STORE.markRead(receiverUserId));
     };
 
+    const incomingCallRequestEventHandler = ({ from, signalData }) => {
+
+        const notificationId = crypto.randomUUID();
+
+        const onAnswer = () => {
+            Store.removeNotification(notificationId);
+            setAnswerVideoCall({
+                from,
+                signalData
+            });
+        }
+
+        const onDecline = () => {
+            Store.removeNotification(notificationId);
+            socket.emit(SOCKET_SERVER_EVENT.CALL_DECLINED, {
+                fromUserId: from.id,
+                by: {
+                    id: currentUser.id,
+                    name: currentUser.name,
+                    email: currentUser.email,
+                }
+            });
+        }
+
+        Store.addNotification({
+            id: notificationId,
+            insert: "bottom",
+            container: "bottom-left",
+            content: <VideoCallNotificationIncomingCall name={from.name} onAnswer={onAnswer} onDecline={onDecline} />,
+        });
+        setNotificationId(notificationId);
+    }
+
+    const callDeclinedEventHandler = ({ by }) => {
+        Store.addNotification({
+            insert: "bottom",
+            container: "bottom-left",
+            content: <VideoCallNotificationCallDeclined name={by.name} />,
+            dismiss: {
+                duration: 10000
+            }
+        });
+        closeVideoCallHandler();
+    }
+
+    const callEndedEventHandler = ({ by }) => {
+        Store.removeNotification(notificationId);
+        Store.addNotification({
+            insert: "bottom",
+            container: "bottom-left",
+            content: <VideoCallNotificationCallEnded name={by.name} />,
+            dismiss: {
+                duration: 10000
+            }
+        });
+        setNotificationId(null);
+        closeVideoCallHandler();
+    }
+
+    const initiateVideoCallHandler = (data) => {
+        setInitiateVideoCall(data);
+    }
+
+    const closeVideoCallHandler = () => {
+        setInitiateVideoCall(null);
+        setAnswerVideoCall(null);
+    }
+
     const sentMessageHandler = (newMessage) => {
         setUsers([...users]);
         setMessages(MESSAGE_STORE.addMessage(newMessage.to, newMessage));
@@ -153,64 +221,44 @@ export default function Chat() {
         setMessages(MESSAGE_STORE.markError(message.to, message));
     }
 
-    const initiateCallHandler = (data) => {
-        setInitiateCall(data);
-    }
-
-    const acceptCallHandler = (data) => {
-        setAcceptCall
-    }
-
-    if (!currentUser) return null;
-
-    if (initiateCall && initiateCall.fromUser && initiateCall.toUser) {
-        return (
-            <VideoCall fromUser={initiateCall.fromUser} toUser={initiateCall.toUser} callInitiated={true} />
-        );
-    }
-
-    if (acceptCall && acceptCall.fromUser && acceptCall.toUser) {
-        return (
-            <VideoCall fromUser={acceptCall.fromUser} toUser={acceptCall.toUser} acceptCall={true} />
-        );
-    }
+    if (!isLoggedIn()) return null;
 
     return (
-        <div className=" chat-body">
-            <ActiveUserContext.Provider value={{ activeUser }}>
-                <div className="chat-sidebar">
-                    <div className="chat-sidebar-header">
-                        <Navbar />
-                        <Search
-                            onSearchResult={users => users && users.length && setSearchResult(users)}
-                            onClose={() => setSearchResult(null)}
-                            close={searchResult === undefined}
-                        />
-                    </div>
-                    <div className="chat-sidebar-body">
-                        {searchResult && searchResult.length > 0 && <>
-                            <div className="recent-users-loading-info">Search results</div>
-                            <Users users={searchResult} userSelectionHandler={updateActiveUser} />
-                        </>
-                        }
-                        {!(searchResult && searchResult.length > 0) && loadingUsers && <div className="recent-users-loading-info">loading conversations...</div>}
-                        {!(searchResult && searchResult.length > 0) && users && users.length > 0 && <Users users={users} userSelectionHandler={updateActiveUser} />}
-                        {!(searchResult && searchResult.length > 0) && !loadingUsers && !(users && users.length > 0) && <div className="recent-users-loading-info">You haven't started a conversation with anyone. Start a conversation by searching for users by their name or email.</div>}
-                    </div>
-                </div>
+        <>
+            <div className={initiateVideoCall || answerVideoCall ? 'video-call-body video-call-front' : 'video-call-body video-call-back'}>
+                <VideoCall initiateVideoCall={initiateVideoCall} answerVideoCall={answerVideoCall} onClose={closeVideoCallHandler} />
+            </div>
 
-                {activeUser && activeUser.id && (
-                    <div className="chatroom">
-                        <ChatroomHeader onInitiateCall={initiateCallHandler} onAcceptCall={acceptCallHandler} />
-                        <ChatroomMessages messages={messages} loading={messagesLoading} />
-                        <ChatroomInput
-                            onMessage={sentMessageHandler}
-                            onSuccess={sentMessageSuccessHandler}
-                            onError={sentMessageErrorHandler}
-                        />
+            <div className="chat-body">
+                <ActiveUserContext.Provider value={{ activeUser }}>
+                    <div className="chat-sidebar">
+                        <div className="chat-sidebar-header">
+                            <Navbar />
+                            <Search
+                                onSearchResult={users => users && users.length && setSearchResult(users)}
+                                onClose={() => setSearchResult(null)}
+                                close={searchResult === undefined}
+                            />
+                        </div>
+                        <div className="chat-sidebar-body">
+                            <ChatSidebar searchResult={searchResult} loadingUsers={loadingUsers} users={users} onUserSelection={updateActiveUser} />
+                        </div>
                     </div>
-                )}
-            </ActiveUserContext.Provider>
-        </div>
+
+                    {activeUser && activeUser.id && (
+                        <div className="chatroom">
+                            <ChatroomHeader onInitiateVideoCall={initiateVideoCallHandler} />
+                            <ChatroomMessages messages={messages} loading={messagesLoading} />
+                            <ChatroomInput
+                                onMessage={sentMessageHandler}
+                                onSuccess={sentMessageSuccessHandler}
+                                onError={sentMessageErrorHandler}
+                            />
+                        </div>
+                    )}
+                </ActiveUserContext.Provider>
+            </div>
+        </>
+
     );
 }

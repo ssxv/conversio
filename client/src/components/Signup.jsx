@@ -1,4 +1,5 @@
 "use client"
+
 import { API_SERVER_URL } from "@/lib/data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,7 +22,7 @@ export default function SignUp() {
             const user = value.data;
             localStorage.setItem('user', JSON.stringify(user));
             setCurrentUserAndCreateSocket(user);
-            router.push('/chat');
+            router.push('/');
         } catch (reason) {
             setSigningUp(false);
             console.log(reason);

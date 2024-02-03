@@ -1,8 +1,12 @@
 "use client"
+
 import { SOCKET_SERVER_URL } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { createContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { ReactNotifications } from 'react-notifications-component'
+import 'react-notifications-component/dist/theme.css'
+// import 'animate.css/animate.min.css';
 
 export const CurrentUserContext = createContext(null);
 export const WebsocketContext = createContext(null);
@@ -14,6 +18,15 @@ export default function App({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [socket, setSocket] = useState(null);
 
+    useEffect(() => {
+        const currentUserFromLocal = JSON.parse(localStorage.getItem('user'));
+        setCurrentUserAndCreateSocket(currentUserFromLocal);
+    }, []);
+
+    const isLoggedIn = () => {
+        return !!(currentUser && currentUser.id && currentUser.token);
+    }
+
     const setCurrentUserAndCreateSocket = (user) => {
         setCurrentUser(user);
         if (user && user.token) {
@@ -21,11 +34,6 @@ export default function App({ children }) {
             setSocket(newSocket);
         }
     }
-
-    useEffect(() => {
-        const currentUserFromLocal = JSON.parse(localStorage.getItem('user'));
-        setCurrentUserAndCreateSocket(currentUserFromLocal);
-    }, []);
 
     const logout = () => {
         setCurrentUser(null);
@@ -35,8 +43,9 @@ export default function App({ children }) {
     }
 
     return (
-        <CurrentUserContext.Provider value={{ currentUser, setCurrentUserAndCreateSocket, logout }} >
+        <CurrentUserContext.Provider value={{ currentUser, isLoggedIn, setCurrentUserAndCreateSocket, logout }} >
             <WebsocketContext.Provider value={{ socket }}>
+                <ReactNotifications />
                 {children}
             </WebsocketContext.Provider>
         </CurrentUserContext.Provider>

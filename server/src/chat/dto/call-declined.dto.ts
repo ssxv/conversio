@@ -1,15 +1,12 @@
 import { User } from '@/users/user.entity';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CallRequestDto {
-
-    @IsNotEmpty()
-    from: User;
+export class CallDeclinedDto {
 
     @IsNotEmpty()
     @IsString()
-    toUserId: string;
+    fromUserId: string;
 
     @IsNotEmpty()
-    signalData: any;
+    by: User;
 }
