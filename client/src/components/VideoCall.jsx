@@ -5,6 +5,7 @@ import * as Peer from "simple-peer"
 import { CurrentUserContext, WebsocketContext } from "./App"
 import { canGetUserMedia, getMediaStream, getVideoDevice, timeout } from "@/lib/util";
 import { SOCKET_SERVER_EVENT } from "@/lib/data";
+import { VideoOff } from "lucide-react";
 
 export default function VideoCall({ initiateVideoCall, answerVideoCall, onClose }) {
 
@@ -62,6 +63,7 @@ export default function VideoCall({ initiateVideoCall, answerVideoCall, onClose 
             const receiverPeer = createReceiverPeer(myStream);
             peerRef.current = receiverPeer;
             receiverPeer.signal(answerVideoCall.signalData);
+            setCalling(false);
             setCallAccepted(true);
         } else {            // initiating a call
             peerRef.current = createCallerPeer(myStream);
@@ -70,6 +72,7 @@ export default function VideoCall({ initiateVideoCall, answerVideoCall, onClose 
                 console.log("CALL_ANSWERED listener ON");
             }
             setCalling(true);
+            setCallAccepted(false);
         }
     }
 
@@ -195,8 +198,14 @@ export default function VideoCall({ initiateVideoCall, answerVideoCall, onClose 
             <div className="video-call-footer">
                 <div className="display-horizontal">
                     <div className="ml-auto mr-auto">
-                        {calling && <button className="button-danger" onClick={endCall}>Cancel</button>}
-                        {callAccepted && <button className="button-danger" onClick={endCall}>End Call</button>}
+                        {calling && <button className="button-danger" onClick={endCall}>
+                            <VideoOff color="var(--tc-pri)" className="mx-2" />
+                        </button>
+                        }
+                        {callAccepted && <button className="button-danger" onClick={endCall}>
+                            <VideoOff color="var(--tc-pri)" className="mx-2" />
+                        </button>
+                        }
                     </div>
                 </div>
             </div>

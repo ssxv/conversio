@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { CurrentUserContext, WebsocketContext } from "@/components/App"
 import { API_SERVER_URL, SOCKET_SERVER_EVENT } from "@/lib/data"
 import axios from "axios"
-import { getReqConfig, timeout, toQueryParams } from "@/lib/util"
+import { getReqConfig, defaultNotificationOptions, toQueryParams } from "@/lib/util"
 import Search from "@/components/Search"
 import Navbar from "@/components/Navbar"
 import { MESSAGE_STORE } from "@/lib/messageStore"
@@ -164,19 +164,18 @@ export default function Chat() {
             });
         }
 
-        Store.addNotification({
-            id: notificationId,
-            insert: "bottom",
-            container: "bottom-left",
-            content: <VideoCallNotificationIncomingCall name={from.name} onAnswer={onAnswer} onDecline={onDecline} />,
-        });
+        const a =
+            Store.addNotification({
+                ...defaultNotificationOptions,
+                id: notificationId,
+                content: <VideoCallNotificationIncomingCall name={from.name} onAnswer={onAnswer} onDecline={onDecline} />,
+            });
         setNotificationId(notificationId);
     }
 
     const callDeclinedEventHandler = ({ by }) => {
         Store.addNotification({
-            insert: "bottom",
-            container: "bottom-left",
+            ...defaultNotificationOptions,
             content: <VideoCallNotificationCallDeclined name={by.name} />,
             dismiss: {
                 duration: 10000
@@ -188,8 +187,7 @@ export default function Chat() {
     const callEndedEventHandler = ({ by }) => {
         Store.removeNotification(notificationId);
         Store.addNotification({
-            insert: "bottom",
-            container: "bottom-left",
+            ...defaultNotificationOptions,
             content: <VideoCallNotificationCallEnded name={by.name} />,
             dismiss: {
                 duration: 10000

@@ -48,3 +48,8 @@ export const getVideoDevice = async () => {
 export const timeout = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const defaultNotificationOptions = {
+    insert: "top",
+    container: "top-right",
+}

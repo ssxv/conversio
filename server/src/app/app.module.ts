@@ -13,6 +13,8 @@ import { AuthGuard } from './guard/auth.guard';
 import { DATASOURCE_NAME } from './app.constant';
 import { UsersModule } from '@/users/user.module';
 import { APP_GUARD } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -44,6 +46,9 @@ import { APP_GUARD } from '@nestjs/core';
           expiresIn: configService.get('JWT_EXPIRY'),
         },
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'out'),
     }),
     AuthModule,
     ChatModule,

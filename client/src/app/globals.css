@@ -381,6 +381,12 @@ input:focus {
   color: var(--tc-pri);
   font-size: medium;
   padding: 0.5em;
-  outline: 0.5em solid var(--ac-pri);
+  background-color: var(--ac-pri);
+  box-shadow: 0.25em 0.25em 0.5em black;
+}
+
+.notification-content {
+  padding: 0.5em;
   background-color: var(--bg-sec);
+  box-shadow: 0.5em var(--tc-sec);
 }
