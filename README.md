@@ -17,9 +17,9 @@ A simple WhatsApp clone.
 
 This project is a WhatsApp clone created using:
     
-- server - `nodejs`, nestjs
+- server - `nodejs`
 - database - `postgres`
-- client - `reactjs`, nextjs
+- client - `reactjs`
     
 It aims to replicate the basic features of WhatsApp.
 
