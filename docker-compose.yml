@@ -8,15 +8,17 @@ services:
 
     backend:
         image: conversio-server
+        build:
+            context: .
         ports:
             - 9000:9000
         depends_on:
             - db
 
-    frontend:
-        image: conversio-client
-        depends_on:
-            - backend
+    # frontend:
+    #     image: conversio-client
+    #     depends_on:
+    #         - backend
 
     nginx:
         image: nginx

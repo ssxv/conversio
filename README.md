@@ -46,6 +46,7 @@ $ git clone https://github.com/ssxv/conversio.git
 $ cd conversio
 $ docker compose up
 ```
+visit: http://localhost/
 
 ### Technologies Used
 
